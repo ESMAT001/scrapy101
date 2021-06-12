@@ -1,2 +1,2 @@
 # scrapy101
-web scraper
+Scrapping web for next web project 
