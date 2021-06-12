@@ -9,4 +9,5 @@ import scrapy
 class MovieScrapperItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    pass
+    movie_name = scrapy.Field()
+    movie_download_links = scrapy.Field()
