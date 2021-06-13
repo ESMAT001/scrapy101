@@ -16,18 +16,22 @@ class SeriesScrapper(scrapy.Spider):
     def parse(self, response):
         series_url = response.css(
             "article.box > div.title h2 a::attr(href)").extract()
-        last_page = response.css(
-            "#wbh-pagenumber li:last-child > a::text").extract()[0]
+        # last_page = response.css(
+        #     "#wbh-pagenumber li:last-child > a::text").extract()
+        # if last_page:
+        #     last_page = last_page[0]
 
         yield from response.follow_all(
             series_url, callback=self.series_scrapper)
 
-        self.last_page = self.last_page or int(last_page)
+        # self.last_page = self.last_page or int(last_page)
 
         next_page = 'https://www.film2movie.asia/category/miscellaneous/series/page/' + \
             str(self.page_num) + '/'
-
-        if self.page_num <= self.last_page:
+        fl = open('page.txt', 'a')
+        fl.write('\n'+str(self.page_num)+'\n')
+        fl.close()
+        if self.page_num <= 179:
             self.page_num += 1
             yield response.follow(next_page, callback=self.parse)
 
