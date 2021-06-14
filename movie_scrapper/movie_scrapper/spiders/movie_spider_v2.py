@@ -5,56 +5,61 @@ from ..items import MovieScrapperItem
 
 
 class MovieScrapper(scrapy.Spider):
-    name = 'movies'
+    name = 'movies_v_2'
     page_num = 2
     last_page = None
     start_urls = [
-        'https://www.film2media.ws/category/film/page/1/'
+        'https://www.film2movie.asia/category/download-film/page/1/'
     ]
 
     def parse(self, response):
         
-        movies_url = response.css("#post-title h2 a::attr(href)").extract()
-        movies_title= response.css("#post-title h2 a::text").extract()
+        movies_url = response.css("div.title > h2 > a::attr(href)").extract()
+        movies_title= response.css("div.title > h2 > a::text").extract()
         for i , value in enumerate(movies_title):
             if 'سریال' in value:
                 movies_url.pop(i)
         # last_page = response.css("div.textwpnumb span::text").extract()[
         #     0].split(" ")
 
+        # yield  {
+        #     'url':movies_url
+        # }
         yield from response.follow_all(
             movies_url, callback=self.movie_scrapper)
 
-        # self.last_page = self.last_page or int(last_page[3])
+        # # self.last_page = self.last_page or int(last_page[3])
 
-        next_page = 'https://www.film2media.ws/category/film/page/' + \
+        next_page = 'https://www.film2movie.asia/category/download-film/page/' + \
             str(self.page_num) + '/'
 
         fl = open('page.txt', 'a')
         fl.write(str(self.page_num)+'\n')
         fl.close()
 
-        if self.page_num <= 371:
+        if self.page_num <= 1:
             self.page_num += 1
             yield response.follow(next_page, callback=self.parse)
 
     def movie_scrapper(self, response):
         items = MovieScrapperItem()
 
-        movie_container = response.css("div.txtbbb div.txtbbb div").getall()
+        movie_container = response.css("div.content > div").getall()
 
-        all_p = response.css("div#content > div.txtbbb > *").extract()
+        # all_p = response.css("div#content > div.txtbbb > *").extract()
 
-        download_links = self.extract_data(all_p,response)
+        # download_links = self.extract_data(all_p,response)
 
-        movie_name = Selector(text=movie_container[0]).css(
-            "strong::text").extract()[0]
+        movie_name = Selector(text=movie_container[0]).css("p > span > span > strong").extract()[0]
+        movie_name = Selector(text=movie_name).css("strong::text")[0]
         # download_links = response.css("div.txtbbb > p a::attr(href)").extract()
 
-        items['movie_name'] = movie_name
-        items['movie_download_links'] = download_links
+        # items['movie_name'] = movie_name
+        # items['movie_download_links'] = download_links
 
-        yield items
+        yield {
+            'name':movie_name
+        }
 
     def extract_data(self, all_p,response):
         def get_download_links(new_all_p):

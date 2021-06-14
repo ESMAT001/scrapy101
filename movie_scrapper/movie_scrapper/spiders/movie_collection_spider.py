@@ -5,11 +5,11 @@ from ..items import MovieScrapperItem
 
 
 class MovieScrapper(scrapy.Spider):
-    name = 'movies'
+    name = 'movies_collection'
     page_num = 2
     last_page = None
     start_urls = [
-        'https://www.film2media.ws/category/film/page/1/'
+        'https://www.film2mediaz.site/category/film/%da%a9%d8%a7%d9%84%da%a9%d8%b4%d9%86-%d9%81%db%8c%d9%84%d9%85/page/1/'
     ]
 
     def parse(self, response):
@@ -17,7 +17,7 @@ class MovieScrapper(scrapy.Spider):
         movies_url = response.css("#post-title h2 a::attr(href)").extract()
         movies_title= response.css("#post-title h2 a::text").extract()
         for i , value in enumerate(movies_title):
-            if 'سریال' in value:
+            if 'سریال' in value or 'کالکشن' in value:
                 movies_url.pop(i)
         # last_page = response.css("div.textwpnumb span::text").extract()[
         #     0].split(" ")
@@ -27,14 +27,14 @@ class MovieScrapper(scrapy.Spider):
 
         # self.last_page = self.last_page or int(last_page[3])
 
-        next_page = 'https://www.film2media.ws/category/film/page/' + \
+        next_page = 'https://www.film2mediaz.site/category/film/%da%a9%d8%a7%d9%84%da%a9%d8%b4%d9%86-%d9%81%db%8c%d9%84%d9%85/page/' + \
             str(self.page_num) + '/'
 
-        fl = open('page.txt', 'a')
+        fl = open('page_new.txt', 'a')
         fl.write(str(self.page_num)+'\n')
         fl.close()
 
-        if self.page_num <= 371:
+        if self.page_num <= 25:
             self.page_num += 1
             yield response.follow(next_page, callback=self.parse)
 
