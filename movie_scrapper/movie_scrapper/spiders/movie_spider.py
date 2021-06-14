@@ -66,7 +66,11 @@ class MovieScrapper(scrapy.Spider):
                     end = i
                     new_data = new_all_p[start:end]
                     start = end + 1
-                    quality_and_size = Selector(text=new_data[0]).css("p > span > span > strong > span::text").extract()
+                    quality_and_size = Selector(text=new_data[0]).css("p").extract()
+
+                    # if len(quality_and_size) < 1:
+                    #     quality_and_size = Selector(text=new_data[0]).css("p > span > strong::text").extract()
+
                     quality_and_size = quality_and_size[0] if len(quality_and_size) > 0 else None
 
                     download_link=Selector(text=new_data[1]).css("p > a::attr(href)").extract()
@@ -79,7 +83,8 @@ class MovieScrapper(scrapy.Spider):
 
                     if (i + 3) == (len(new_all_p)-1):
                         new_data = new_all_p[i+1:]
-                        quality_and_size = Selector(text=new_data[0]).css("p > span > span > strong > span::text").extract()
+                        quality_and_size = Selector(text=new_data[0]).css("p").extract()
+
                         quality_and_size = quality_and_size[0] if len(quality_and_size) > 0 else None
 
                         download_link=Selector(text=new_data[1]).css("p > a::attr(href)").extract()
@@ -142,7 +147,7 @@ class MovieScrapper(scrapy.Spider):
             fl.close()
             for i in range(2):
                 all_p[i].pop(0)
-                all_p[i].pop(1)
+                all_p[i].pop(0)
                 all_p[i].pop(-1)
            
             return {
