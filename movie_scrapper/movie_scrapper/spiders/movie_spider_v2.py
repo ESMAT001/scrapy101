@@ -5,7 +5,7 @@ from ..items import MovieScrapperItem
 
 
 class MovieScrapper(scrapy.Spider):
-    name = 'movies_v_2'
+    name = 'movies_v2'
     page_num = 2
     last_page = None
     start_urls = [
@@ -18,16 +18,15 @@ class MovieScrapper(scrapy.Spider):
         fl.close()
         movies_url = response.css("div.title > h2 > a::attr(href)").extract()
         movies_title= response.css("div.title > h2 > a::text").extract()
-        for i , value in enumerate(movies_title):
-            if 'سریال' in value:
-                movies_url.pop(i)
-        
-        yield  {
-            'url':movies_url
-        }
 
-        yield from response.follow_all(
-            movies_url, callback=self.movie_scrapper)
+        if len(movies_url) > 0 :
+            for i , value in enumerate(movies_title):
+                if 'سریال' in value:
+                    movies_url.pop(i)
+            
+
+            yield from response.follow_all(
+                movies_url, callback=self.movie_scrapper)
 
         # # self.last_page = self.last_page or int(last_page[3])
 
@@ -38,7 +37,7 @@ class MovieScrapper(scrapy.Spider):
         fl.write(str(self.page_num-1)+'\n')
         fl.close()
 
-        if self.page_num <= 1:
+        if self.page_num <= 1395:
             self.page_num += 1
             yield response.follow(next_page, callback=self.parse)
 
@@ -62,10 +61,7 @@ class MovieScrapper(scrapy.Spider):
 
     def extract_data(self, all_p,response):
         def get_download_links(new_all_p):
-            if 'نسخه دوبله فارسی (دو زبانه)' in new_all_p[0]:
-                new_all_p.pop(0)
-                new_all_p.pop(0)
-
+            
             download_links = list()
             start = 0
             end = 0
@@ -96,7 +92,7 @@ class MovieScrapper(scrapy.Spider):
 
         for i , value in enumerate(all_p):
             if "<h3" in value:
-                h3_index=i+1
+                h3_index= i+1 if h3_index is None else h3_index
             elif "<hr>" in value:
                 hr_index=i       
 
@@ -119,10 +115,12 @@ class MovieScrapper(scrapy.Spider):
         if not(should_change):
             return {'original_lang': get_download_links(all_p)}
         else:
-           
-            all_p[1].pop(-1)
-           
-            return {
-                'persian_lang': get_download_links(all_p[0]),
-                'original_lang': get_download_links(all_p[1])
-            }
+            if 'نسخه دوبله فارسی (دو زبانه)' in all_p[0][0]:
+                return {
+                    'dual_lang': get_download_links(all_p[0]),
+                    'original_lang': get_download_links(all_p[1])
+                }
+            else:
+                return {
+                    'original_lang': get_download_links(all_p[1])
+                }
