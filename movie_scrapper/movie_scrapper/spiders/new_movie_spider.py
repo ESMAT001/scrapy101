@@ -14,8 +14,7 @@ class MovieScrapper(scrapy.Spider):
 
     def parse(self, response):
         movies_url = response.css("article.box > div.titlehaver > div.title > h2 > a::attr(href)").extract()
-        # last_page = response.css("div.textwpnumb span::text").extract()[
-        #     0].split(" ")
+
         fl=open('index.html','w',encoding='utf-8')
         fl.write(str(response.css("html").extract()[0]))
         fl.close()
@@ -25,7 +24,7 @@ class MovieScrapper(scrapy.Spider):
         yield from response.follow_all(
             movies_url, callback=self.movie_scrapper)
 
-        # # # self.last_page = self.last_page or int(last_page[3])
+
 
         next_page = 'https://www.film2movie.asia/page/' + \
             str(self.page_num) + '/'
